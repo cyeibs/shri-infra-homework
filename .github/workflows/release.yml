@@ -27,6 +27,21 @@ jobs:
           docker tag shri-infra:latest cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
           docker push cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}
           docker push cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Log in to Yandex Container Registry
+        run: echo "${{ secrets.YCR_TOKEN }}" | docker login --username oauth --password-stdin cr.yandex
+      - name: Push to Yandex Container Registry
+        run: |
+          docker tag shri-infra cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}
+          docker tag shri-infra cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
+          docker push cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}
+          docker push cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
       - name: Create Release Tag
         run: |
           git tag -a v${{ github.run_number }} -m "Release ${{ github.run_number }}"
