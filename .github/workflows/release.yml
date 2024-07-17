@@ -7,7 +7,7 @@ on:
       - 'v*.*.*'
 
 jobs:
-  build:
+  lint_and_test:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,27 +19,27 @@ jobs:
       - run: npm install
       - run: npm run lint
       - run: npm test
+
+  build_and_push:
+    runs-on: ubuntu-latest
+    needs: lint_and_test
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20.14.0'
+      - run: npm install
+      - run: npm run build
       - name: Build Docker image
         run: docker build . -t shri-infra:latest
+      - name: Log in to Yandex Container Registry
+        run: echo "${{ secrets.YCR_TOKEN }}" | docker login --username oauth --password-stdin cr.yandex
       - name: Tag and Push Docker images to Yandex Container Registry
         run: |
           docker tag shri-infra:latest cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}
           docker tag shri-infra:latest cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
-          docker push cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}
-          docker push cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Log in to Yandex Container Registry
-        run: echo "${{ secrets.YCR_TOKEN }}" | docker login --username oauth --password-stdin cr.yandex
-      - name: Push to Yandex Container Registry
-        run: |
-          docker tag shri-infra cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}
-          docker tag shri-infra cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
           docker push cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}
           docker push cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
       - name: Create Release Tag
@@ -62,7 +62,7 @@ jobs:
 
   deploy_to_prod:
     runs-on: ubuntu-latest
-    needs: deploy
+    needs: build_and_push
 
     steps:
       - name: Check if image exists in Yandex Container Registry
@@ -94,10 +94,10 @@ jobs:
             echo "Pulling the latest Docker image"
             docker pull cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
             echo "Stopping and removing old container"
-            docker stop dockerone || true
-            docker rm dockerone || true
+            docker stop my_app_container || true
+            docker rm my_app_container || true
             echo "Running the new Docker image"
-            docker run -d --name dockerone -p 3000:3000 cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
+            docker run -d --name my_app_container -p 3000:3000 cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
 
       - name: Update Issue with deployment information
         uses: actions-ecosystem/action-create-issue@v1
