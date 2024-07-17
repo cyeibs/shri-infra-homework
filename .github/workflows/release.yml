@@ -86,11 +86,7 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             echo "Logging in to Yandex Container Registry"
-            curl -H Metadata-Flavor:Google 169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token | \
-            cut -f1 -d',' | \
-            cut -f2 -d':' | \
-            tr -d '"' | \
-            docker login --username iam --password-stdin cr.yandex
+            echo "${{ secrets.YCR_TOKEN }}" | docker login --username oauth --password-stdin cr.yandex
             echo "Pulling the latest Docker image"
             docker pull cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
             echo "Stopping and removing old container"
