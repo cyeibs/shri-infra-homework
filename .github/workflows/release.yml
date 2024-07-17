@@ -42,6 +42,10 @@ jobs:
           docker tag shri-infra:latest cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
           docker push cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}
           docker push cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
+      - name: Set up Git user
+        run: |
+          git config --global user.email "ph.kirilltsvetkov@yandex.ru"
+          git config --global user.name "Kirill"
       - name: Create Release Tag
         run: |
           git tag -a v${{ github.run_number }} -m "Release ${{ github.run_number }}"
