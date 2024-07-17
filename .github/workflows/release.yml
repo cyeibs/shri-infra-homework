@@ -47,7 +47,7 @@ jobs:
           git tag -a v${{ github.run_number }} -m "Release ${{ github.run_number }}"
           git push origin --tags
       - name: Create Issue
-        uses: actions-ecosystem/action-create-issue@v1
+        uses: JasonEtco/create-an-issue@v2.9.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: Release ${{ github.run_number }}
