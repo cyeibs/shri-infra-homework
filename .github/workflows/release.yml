@@ -15,7 +15,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '20.14.0'
       - run: npm install
       - run: npm run lint
       - run: npm test
@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Log in to Yandex Container Registry
-        run: echo "${{ secrets.YCR_TOKEN }}" | docker login cr.yandex -u oauth --password-stdin
+        run: echo "${{ secrets.YCR_TOKEN }}" | docker login --username oauth --password-stdin cr.yandex
       - name: Push to Yandex Container Registry
         run: |
           docker tag shri-infra cr.yandex/<идентификатор_реестра>/app:${{ github.run_number }}
