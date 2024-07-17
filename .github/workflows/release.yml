@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Install Node.js
         uses: actions/setup-node@v2
         with:
@@ -26,15 +26,15 @@ jobs:
     needs: build
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Log in to Yandex Container Registry
         run: echo "${{ secrets.YCR_TOKEN }}" | docker login --username oauth --password-stdin cr.yandex
       - name: Push to Yandex Container Registry
         run: |
-          docker tag shri-infra cr.yandex/<идентификатор_реестра>/app:${{ github.run_number }}
-          docker tag shri-infra cr.yandex/<идентификатор_реестра>/app:${{ github.run_number }}_latest
-          docker push cr.yandex/<идентификатор_реестра>/app:${{ github.run_number }}
-          docker push cr.yandex/<идентификатор_реестра>/app:${{ github.run_number }}_latest
+          docker tag shri-infra cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}
+          docker tag shri-infra cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
+          docker push cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}
+          docker push cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
       - name: Create Release Tag
         run: |
           git tag -a v${{ github.run_number }} -m "Release ${{ github.run_number }}"
@@ -51,4 +51,55 @@ jobs:
             **Коммиты:**
             ${{ github.event.commits }}
             **Docker образ:**
-            cr.yandex/<идентификатор_реестра>/app:${{ github.run_number }}
+            cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}
+
+  deploy_to_prod:
+    runs-on: ubuntu-latest
+    needs: deploy
+
+    steps:
+      - name: Check if image exists in Yandex Container Registry
+        run: |
+          if ! docker manifest inspect cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest; then
+            echo "Image not found!" && exit 1
+          fi
+
+      - name: Start ssh-agent and add key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
+
+      - name: SSH and deploy to prod
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.PROD_SERVER_HOST }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          script: |
+            echo "Logging in to Yandex Container Registry"
+            curl -H Metadata-Flavor:Google 169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token | \
+            cut -f1 -d',' | \
+            cut -f2 -d':' | \
+            tr -d '"' | \
+            docker login --username iam --password-stdin cr.yandex
+            echo "Pulling the latest Docker image"
+            docker pull cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
+            echo "Stopping and removing old container"
+            docker stop dockerone || true
+            docker rm dockerone || true
+            echo "Running the new Docker image"
+            docker run -d --name dockerone -p 3000:3000 cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
+
+      - name: Update Issue with deployment information
+        uses: actions-ecosystem/action-create-issue@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: Deployment to production
+          body: |
+            **Дата выкатки:** $(date)
+            **Автор выкатки:** ${{ github.actor }}
+            **Версия:** ${{ github.run_number }}
+            **Docker образ:** cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
+            Релиз выкачен в прод.
