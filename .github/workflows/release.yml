@@ -51,18 +51,13 @@ jobs:
           git tag -a v${{ github.run_number }} -m "Release ${{ github.run_number }}"
           git push origin --tags
       - name: Create Issue
-        uses: actions-ecosystem/action-create-issue@v1
+        uses: JasonEtco/create-an-issue@v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: Release ${{ github.run_number }}
-          body: |
-            **Дата:** ${{ github.event.date }}
-            **Автор релиза:** ${{ github.actor }}
-            **Номер версии:** ${{ github.run_number }}
-            **Коммиты:**
-            ${{ github.event.commits }}
-            **Docker образ:**
-            cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}
+          filename: .github/ISSUE_TEMPLATE.md
+          update_existing: true
+          search_existing: all
 
   deploy_to_prod:
     runs-on: ubuntu-latest
