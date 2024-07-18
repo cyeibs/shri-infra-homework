@@ -16,6 +16,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Log in to Yandex Container Registry
+        run: echo "${{ secrets.YCR_TOKEN }}" | docker login --username oauth --password-stdin cr.yandex
+
       - name: Check if image exists in Yandex Container Registry
         run: |
           if ! docker manifest inspect cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.event.inputs.release_version }}_latest; then
@@ -41,8 +44,8 @@ jobs:
             echo "Pulling the latest Docker image"
             docker pull cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.event.inputs.release_version }}_latest
             echo "Stopping and removing old container"
-            docker stop dockerone || true
-            docker rm dockerone || true
+            docker stop my_app_container || true
+            docker rm my_app_container || true
             echo "Running the new Docker image"
             docker run -d --name my_app_container -p 3000:3000 cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.event.inputs.release_version }}_latest
 
@@ -59,4 +62,4 @@ jobs:
             ### Release ${{ github.event.inputs.release_version }} deployed to production.
             **Дата выкатки:** ${{ env.CURRENT_DATE }}
             **Автор выкатки:** ${{ github.actor }}
-            **Docker образ:** [Ссылка](cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.event.inputs.release_version }}_latest)
+            **Docker образ:** cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.event.inputs.release_version }}_latest
