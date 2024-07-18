@@ -56,6 +56,11 @@ jobs:
           git push origin --tags
       - name: Set Date
         run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+      - name: Create Release Label
+        run: |
+          gh label create "release-${{ github.run_number }}" --color "#0E8A16" || echo "Label already exists"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Release Issue
         run: |
           gh issue create \
