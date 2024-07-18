@@ -1,5 +1,5 @@
 ---
-title: Release {{ github.run_number }}
+title: Release {{ env.RUN_NUMBER }}
 labels: release
 ---
 **Дата:** {{ date | date('dddd, MMMM Do') }}
@@ -8,4 +8,4 @@ labels: release
 **Коммиты:**
 {{ github.event.head_commit.message }}
 **Docker образ:**
-cr.yandex/crpk6ta1ej2mrcheq6qs/app:{{ github.run_number }}
+cr.yandex/crpk6ta1ej2mrcheq6qs/app:{{ env.RUN_NUMBER }}
