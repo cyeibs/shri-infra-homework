@@ -38,10 +38,10 @@ jobs:
             echo "Pulling the latest Docker image"
             docker pull cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.event.inputs.release_version }}_latest
             echo "Stopping and removing old container"
-            docker stop my_app_container || true
-            docker rm my_app_container || true
+            docker stop dockerone || true
+            docker rm dockerone || true
             echo "Running the new Docker image"
-            docker run -d --name my_app_container -p 3000:3000 cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.event.inputs.release_version }}_latest
+            docker run -d --name dockerone -p 3000:3000 cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.event.inputs.release_version }}_latest
 
       - name: Set Date
         run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
