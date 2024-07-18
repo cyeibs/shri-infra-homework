@@ -73,6 +73,7 @@ jobs:
         run: |
           git fetch --tags
           latest_tag=$(git describe --tags --abbrev=0)
+          echo "Latest tag: $latest_tag"
           echo "## Release ${{ github.run_number }} - $(date)" > temp_CHANGELOG.md
           echo >> temp_CHANGELOG.md
           git log --pretty=format:"- %s" $latest_tag..HEAD >> temp_CHANGELOG.md
