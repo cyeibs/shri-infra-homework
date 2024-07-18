@@ -63,18 +63,23 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TITLE: "Release ${{ github.run_number }}"
           BODY: |
-            Release ${{ github.run_number }} created.
-            **Дата:** $(date)
+            ### Release ${{ github.run_number }} created.
+            **Дата:** ${{ date | date('dddd, MMMM Do') }}
             **Автор релиза:** ${{ github.actor }}
             **Номер версии:** ${{ github.run_number }}
-            **Docker образ:** cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
+            **Docker образ:** [Ссылка](cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest)
           LABELS: release
       - name: Update Changelog
         run: |
-          echo "## Release ${{ github.run_number }} - $(date)" >> CHANGELOG.md
-          echo >> CHANGELOG.md
-          git log --pretty=format:"- %s" $(git describe --tags --abbrev=0)..HEAD >> CHANGELOG.md
-          echo >> CHANGELOG.md
+          git fetch --tags
+          latest_tag=$(git describe --tags --abbrev=0)
+          echo "## Release ${{ github.run_number }} - $(date)" > temp_CHANGELOG.md
+          echo >> temp_CHANGELOG.md
+          git log --pretty=format:"- %s" $latest_tag..HEAD >> temp_CHANGELOG.md
+          echo >> temp_CHANGELOG.md
+          cat CHANGELOG.md >> temp_CHANGELOG.md
+          mv temp_CHANGELOG.md CHANGELOG.md
+          cat CHANGELOG.md
           git add CHANGELOG.md
           git commit -m "Update CHANGELOG for release ${{ github.run_number }}"
           git push origin main
