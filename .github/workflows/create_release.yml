@@ -112,6 +112,8 @@ jobs:
             --body "This PR updates the CHANGELOG.md file for release ${{ github.run_number }}." \
             --base main \
             --head releases/${{ github.run_number }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Merge Pull Request
         run: |
           pr_number=$(gh pr list --base main --head releases/${{ github.run_number }} --json number --jq '.[0].number')
