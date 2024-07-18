@@ -24,13 +24,7 @@ jobs:
           if ! docker manifest inspect cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.event.inputs.release_version }}_latest; then
             echo "Image not found!" && exit 1
           fi
-
-      - name: Start ssh-agent and add key
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
-
+          
       - name: SSH and deploy to prod
         uses: appleboy/ssh-action@master
         with:
