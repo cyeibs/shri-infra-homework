@@ -59,7 +59,7 @@ jobs:
         run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
       - name: Add Fix Comment to Issue
         run: |
-          issue_number=$(gh issue list --label release --json number --jq '.[0].number')
+          issue_number=$(gh issue list --label release-${{ github.event.inputs.release_version }} --json number --jq '.[0].number')
           gh issue comment "$issue_number" --body "$BODY"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
