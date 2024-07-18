@@ -59,4 +59,4 @@ jobs:
             ### Release ${{ github.event.inputs.release_version }} deployed to production.
             **Дата выкатки:** ${{ env.CURRENT_DATE }}
             **Автор выкатки:** ${{ github.actor }}
-            **Docker образ:** [Ссылка](cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.event.inputs.release_version }}_latest)
+            **Docker образ:** [Ссылка](http://cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.event.inputs.release_version }}_latest)
