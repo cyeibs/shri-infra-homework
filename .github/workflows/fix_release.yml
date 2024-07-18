@@ -68,4 +68,4 @@ jobs:
             **Дата:** ${{ env.CURRENT_DATE }}
             **Автор фикса:** ${{ github.actor }}
             **Номер версии:** ${{ github.event.inputs.release_version }}_fix${{ github.run_number }}
-            **Docker образ:** cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.event.inputs.release_version }}_fix${{ github.run_number }}
+            **Docker образ:** [Ссылка](cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.event.inputs.release_version }}_fix${{ github.run_number }})
