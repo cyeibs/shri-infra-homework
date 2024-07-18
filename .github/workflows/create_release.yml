@@ -54,6 +54,8 @@ jobs:
           git push origin releases/${{ github.run_number }}
           git tag -a v${{ github.run_number }} -m "Release ${{ github.run_number }}"
           git push origin --tags
+      - name: Set Date
+        run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
       - name: Create Release Issue
         run: |
           gh issue create \
@@ -65,7 +67,7 @@ jobs:
           TITLE: "Release ${{ github.run_number }}"
           BODY: |
             ### Release ${{ github.run_number }} created.
-            **Дата:** $(date)
+            **Дата:** ${{ env.CURRENT_DATE }}
             **Автор релиза:** ${{ github.actor }}
             **Номер версии:** ${{ github.run_number }}
             **Docker образ:** [Ссылка](cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest)
