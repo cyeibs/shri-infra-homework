@@ -1,0 +1,69 @@
+name: Fix Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Version of the release to fix'
+        required: true
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  lint_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20.14.0'
+      - run: npm install
+      - run: npm run lint
+      - run: npm test
+
+  build_and_push_fix:
+    runs-on: ubuntu-latest
+    needs: lint_and_test
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20.14.0'
+      - run: npm install
+      - run: npm run build
+      - name: Build Docker image
+        run: docker build . -t shri-infra:latest
+      - name: Log in to Yandex Container Registry
+        run: echo "${{ secrets.YCR_TOKEN }}" | docker login --username oauth --password-stdin cr.yandex
+      - name: Tag and Push Docker images to Yandex Container Registry
+        run: |
+          docker tag shri-infra:latest cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.event.inputs.release_version }}_fix${{ github.run_number }}
+          docker tag shri-infra:latest cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.event.inputs.release_version }}_latest
+          docker push cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.event.inputs.release_version }}_fix${{ github.run_number }}
+          docker push cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.event.inputs.release_version }}_latest
+      - name: Set up Git user
+        run: |
+          git config --global user.email "ph.kirilltsvetkov@yandex.ru"
+          git config --global user.name "Kirill"
+      - name: Create Fix Tag
+        run: |
+          git tag -a v${{ github.event.inputs.release_version }}_fix${{ github.run_number }} -m "Fix Release ${{ github.event.inputs.release_version }}_fix${{ github.run_number }}"
+          git push origin --tags
+      - name: Add Fix Comment to Issue
+        run: |
+          issue_number=$(gh issue list --label release --json number --jq '.[0].number')
+          gh issue comment "$issue_number" --body "$BODY"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BODY: |
+            Fix Release ${{ github.event.inputs.release_version }}_fix${{ github.run_number }} applied.
+            **Дата:** $(date)
+            **Автор фикса:** ${{ github.actor }}
+            **Номер версии:** ${{ github.event.inputs.release_version }}_fix${{ github.run_number }}
+            **Docker образ:** cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.event.inputs.release_version }}_fix${{ github.run_number }}
