@@ -46,8 +46,15 @@ jobs:
       - name: Set Date
         run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
 
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
       - name: Update Issue with deployment information
         run: |
+          issue_number=$(gh issue list --label release --json number --jq '.[0].number')
+          gh issue comment "$issue_number" --body "$BODY"
+          issue_number=$(gh issue list --label release --json number --jq '.[0].number')
+          gh issue comment "$issue_number" --body "$BODY"
           issue_number=$(gh issue list --label release --json number --jq '.[0].number')
           gh issue comment "$issue_number" --body "$BODY"
         env:
