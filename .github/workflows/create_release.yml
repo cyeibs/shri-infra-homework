@@ -64,7 +64,7 @@ jobs:
           TITLE: "Release ${{ github.run_number }}"
           BODY: |
             ### Release ${{ github.run_number }} created.
-            **Дата:** ${{ date | date('dddd, MMMM Do') }}
+            **Дата:** $(date('dddd, MMMM Do'))
             **Автор релиза:** ${{ github.actor }}
             **Номер версии:** ${{ github.run_number }}
             **Docker образ:** [Ссылка](cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest)
