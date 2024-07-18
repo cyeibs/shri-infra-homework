@@ -78,9 +78,13 @@ jobs:
           echo >> temp_CHANGELOG.md
           git log --pretty=format:"- %s" $latest_tag..HEAD >> temp_CHANGELOG.md
           echo >> temp_CHANGELOG.md
+          echo "Current CHANGELOG.md content:"
+          cat CHANGELOG.md
           cat CHANGELOG.md >> temp_CHANGELOG.md
           mv temp_CHANGELOG.md CHANGELOG.md
+          echo "Updated CHANGELOG.md content:"
           cat CHANGELOG.md
           git add CHANGELOG.md
           git commit -m "Update CHANGELOG for release ${{ github.run_number }}"
           git push origin main
+
