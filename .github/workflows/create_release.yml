@@ -56,18 +56,18 @@ jobs:
       - name: Create Release Issue
         run: |
           gh issue create \
-            --title "$TITLE" \ 
+            --title "$TITLE" \
             --body "$BODY" \
-            --label "$LABELS" \
+            --label "$LABELS"
         env:
-          TITLE: Release ${{ github.run_number }}
-          BODY: |
-            Release ${{ github.run_number }} created. 
-            **Дата:** $(date)
-            **Автор релиза:** ${{ github.actor }} 
-            **Номер версии:** ${{ github.run_number }} 
-            **Docker образ:** cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TITLE: "Release ${{ github.run_number }}"
+          BODY: |
+            Release ${{ github.run_number }} created.
+            **Дата:** $(date)
+            **Автор релиза:** ${{ github.actor }}
+            **Номер версии:** ${{ github.run_number }}
+            **Docker образ:** cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest
           LABELS: release
       - name: Update Changelog
         run: |
