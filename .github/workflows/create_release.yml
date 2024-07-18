@@ -71,7 +71,7 @@ jobs:
             **Автор релиза:** ${{ github.actor }}
             **Номер версии:** ${{ github.run_number }}
             **Docker образ:** [Ссылка](cr.yandex/crpk6ta1ej2mrcheq6qs/app:${{ github.run_number }}_latest)
-          LABELS: release
+          LABELS: release-${{ github.run_number }}"
       - name: Update Changelog
         run: |
           git fetch --tags
