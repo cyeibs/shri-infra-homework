@@ -87,7 +87,7 @@ jobs:
           cat CHANGELOG.md
           git add CHANGELOG.md
           git commit -m "Update CHANGELOG for release ${{ github.run_number }}"
-          git push origin main --force
+          git push origin releases/${{ github.run_number }}
 
   create_pull_request:
       runs-on: ubuntu-latest
